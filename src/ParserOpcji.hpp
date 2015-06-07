@@ -7,8 +7,8 @@
 using namespace std;
 
 class ParserOpcji {
-    ParserOpcji()                 = delete;
-    ParserOpcji(ParserOpcji const&)    = delete;
+    ParserOpcji()                             = delete;
+    ParserOpcji(ParserOpcji const&)           = delete;
     ParserOpcji operator=(ParserOpcji const&) = delete;
 
     public:

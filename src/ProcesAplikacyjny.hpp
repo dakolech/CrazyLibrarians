@@ -1,13 +1,14 @@
 #ifndef PROCESAPLIKACYJNY
 #define PROCESAPLIKACYJNY
 
-class ProcesAplikacyjny {
-    Bibliotekarz bibliotekarz;
+#include "IWykonywalny.hpp"
 
+class ProcesAplikacyjny : public IWykonywalny {
+    //Bibliotekarz bibliotekarz;
     public:
         ProcesAplikacyjny(int argc, char *argv[]);
         
-        
+        void wykonaj();
 };
 
 #endif /* PROCESAPLIKACYJNY_H */

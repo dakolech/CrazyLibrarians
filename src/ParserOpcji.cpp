@@ -11,9 +11,9 @@ map<string, string> ParserOpcji::zczytajOpcjeUruchomienia(int argc, char *argv[]
     if (argc < 3)
         throw BladParsowaniaOpcji(argv[0]);
 
-    while ((tmp = getopt(argc, argv, "b:p:l:")) != -1) {
+    while ((tmp = getopt(argc, argv, "p:l:")) != -1) {
         switch (tmp) {
-            case 'b': case 'p': case 'l':
+            case 'p': case 'l':
                 opcje[string(&tmp)] = string(optarg);
                 break;
             default:

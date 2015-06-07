@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include <iostream>
-#include "Opcje.hpp"
+#include "ProcesAplikacyjny.hpp"
 #include "Wyjatki.hpp"
 
 using namespace std;
@@ -24,12 +24,8 @@ int main(int argc, char **argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &tid );
     
     try {
-        Opcje::pobierzInstancje().zaladujOpcjeProgramu(argc, argv);
-        if (tid == 0) {
-            cout << "Bibliotekarzy: " << Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy() << "\n"
-                 << "MPC: " << Opcje::pobierzInstancje().pobierzLiczbeMPC() << "\n"
-                 << "Dostepow do MPC: " << Opcje::pobierzInstancje().pobierzLiczbeDostepowDoMPC() << "\n";
-        }
+        ProcesAplikacyjny p(argc, argv);
+        p.wykonaj();
     } catch (BladParsowaniaOpcji &e) {
         if (tid == 0)
             cerr << e.what();

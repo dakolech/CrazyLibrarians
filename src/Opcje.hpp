@@ -11,8 +11,7 @@ class Opcje {
     Opcje(Opcje const&)          = delete;
     void operator=(Opcje const&) = delete;
 
-    int liczbaBibliotakrzy,
-        liczbaMPC,
+    int liczbaMPC,
         liczbaDostepowDoMPC;
 
     public:
@@ -20,7 +19,6 @@ class Opcje {
 
         void zaladujOpcjeProgramu(int argc, char *argv[]);
 
-        int pobierzLiczbeBibliotekarzy() const;
         int pobierzLiczbeMPC() const;
         int pobierzLiczbeDostepowDoMPC() const;
 };

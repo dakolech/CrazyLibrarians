@@ -9,4 +9,4 @@ else
     BIBLIOTEKARZE=$1
 fi
 
-mpirun -np $BIBLIOTEKARZE debug/CrazyLibrarians -b $BIBLIOTEKARZE
+mpirun -np $BIBLIOTEKARZE debug/CrazyLibrarians -p 10 -l 10
