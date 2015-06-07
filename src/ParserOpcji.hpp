@@ -11,8 +11,6 @@ class ParserOpcji {
     ParserOpcji(ParserOpcji const&)    = delete;
     ParserOpcji operator=(ParserOpcji const&) = delete;
 
-    static void wyswietlPomoc(char *nazwaProgramu);
-
     public:
         static map<string, string> zczytajOpcjeUruchomienia(int argc, char *argv[]);
 };

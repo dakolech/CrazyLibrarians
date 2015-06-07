@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include "ParserOpcji.hpp"
+#include "Wyjatki.hpp"
 using namespace std;
 
 #define POINTS 10000
@@ -13,8 +14,6 @@ using namespace std;
 #define MSG_TAG 100
 
 int main(int argc, char **argv) {
-    map<string, string> opcje = ParserOpcji::zczytajOpcjeUruchomienia(argc, argv);
-    
     int size,tid;
     int R;
 
@@ -22,6 +21,16 @@ int main(int argc, char **argv) {
 
     MPI_Comm_size( MPI_COMM_WORLD, &size );
     MPI_Comm_rank( MPI_COMM_WORLD, &tid );
+    
+    try {
+        map<string, string> opcje = ParserOpcji::zczytajOpcjeUruchomienia(argc, argv);
+    } catch (WyswietlonoPomoc &e) {
+        if (tid == 0)
+            cerr << e.what();
+        
+        MPI_Finalize();
+        return 0;
+    }
 
     srand( tid * time(NULL) );
 
