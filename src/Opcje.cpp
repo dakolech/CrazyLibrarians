@@ -11,14 +11,18 @@ Opcje& Opcje::pobierzInstancje() {
     return instancja;
 }
 
-void Opcje::zaladujOpcjeProgramu(int argc, char *argv[]) {
+void Opcje::zaladujOpcjeProgramu(int argc, char *argv[], int liczbaBibliotakrzy) {
     map<string, string> opcje = ParserOpcji::zczytajOpcjeUruchomienia(argc, argv);
 
     if (opcje.find("p") != opcje.end())
         liczbaMPC = stoul(opcje["p"]);
     if (opcje.find("l") != opcje.end())
         liczbaDostepowDoMPC = stoul(opcje["l"]);
+        
+    this->liczbaBibliotakrzy = liczbaBibliotakrzy;
 }
+
+int Opcje::pobierzLiczbeBibliotekarzy() const { return liczbaBibliotakrzy; }
 
 int Opcje::pobierzLiczbeMPC() const { return liczbaMPC; }
 
