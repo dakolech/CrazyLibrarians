@@ -9,15 +9,15 @@ map<string, string> ParserOpcji::zczytajOpcjeUruchomienia(int argc, char *argv[]
     std::map<string, string> opcje;
 
     if (argc < 3)
-        throw WyswietlonoPomoc(argv[0]);
+        throw BladParsowaniaOpcji(argv[0]);
 
-    while ((tmp = getopt(argc, argv, "b:p:")) != -1) {
+    while ((tmp = getopt(argc, argv, "b:p:l:")) != -1) {
         switch (tmp) {
-            case 'b': case 'p':
+            case 'b': case 'p': case 'l':
                 opcje[string(&tmp)] = string(optarg);
                 break;
             default:
-                throw WyswietlonoPomoc(argv[0]);
+                throw BladParsowaniaOpcji(argv[0]);
                 break;
         }
     }

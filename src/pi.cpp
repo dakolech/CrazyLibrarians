@@ -4,7 +4,7 @@
 #include <math.h>
 
 #include <iostream>
-#include "ParserOpcji.hpp"
+#include "Opcje.hpp"
 #include "Wyjatki.hpp"
 using namespace std;
 
@@ -23,8 +23,13 @@ int main(int argc, char **argv) {
     MPI_Comm_rank( MPI_COMM_WORLD, &tid );
     
     try {
-        map<string, string> opcje = ParserOpcji::zczytajOpcjeUruchomienia(argc, argv);
-    } catch (WyswietlonoPomoc &e) {
+        Opcje::pobierzInstancje().zaladujOpcjeProgramu(argc, argv);
+        if (tid == 0) {
+            cout << "Bibliotekarzy: " << Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy() << "\n"
+                 << "MPC: " << Opcje::pobierzInstancje().pobierzLiczbeMPC() << "\n"
+                 << "Dostepow do MPC: " << Opcje::pobierzInstancje().pobierzLiczbeDostepowDoMPC() << "\n";
+        }
+    } catch (BladParsowaniaOpcji &e) {
         if (tid == 0)
             cerr << e.what();
         
