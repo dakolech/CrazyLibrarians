@@ -1,7 +1,13 @@
 #ifndef PROCESAPLIKACYJNY
 #define PROCESAPLIKACYJNY
 
+#include "Bibliotekarz.hpp"
+#include <memory>
+
+using namespace std;
+
 class ProcesAplikacyjny {
+    unique_ptr<Bibliotekarz> bibliotekarz;
     int tid,
         liczbaBibliotekarzy;
     public:

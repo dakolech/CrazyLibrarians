@@ -14,12 +14,15 @@ void ProcesAplikacyjny::zaladuj(int argc, char *argv[]) {
     MPI_Comm_size(MPI_COMM_WORLD, &liczbaBibliotekarzy);
     MPI_Comm_rank(MPI_COMM_WORLD, &tid);
 
+    srand(tid);
     Opcje::pobierzInstancje().zaladujOpcjeProgramu(argc, argv, liczbaBibliotekarzy);
+    
+    bibliotekarz.reset(new Bibliotekarz(tid));
 }
 
 void ProcesAplikacyjny::wykonaj() {
     while (true) {
-        1;
+        bibliotekarz->zajmujSieSoba();
     }
 }
 
