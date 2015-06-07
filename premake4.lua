@@ -1,14 +1,14 @@
 solution "Distracted Processing"
 
     project "CrazyLibrarians"
-        premake.gcc.cc = 'mpicc'
+        premake.gcc.cc = 'mpic++'
     
         configurations { "debug", "release" }
-            language "C"
+            language "C++"
             kind "ConsoleApp"
-            files "src/**.c"
-            buildoptions { "-w -Wall" }
-            linkoptions { "-lmpi" }
+            files "src/**.cpp"
+            buildoptions { "-w -Wall -I/usr/include/openmpi" }
+            linkoptions { "-lmpi -lmpi_cxx" }
             objdir "obj/src"
 
         configuration { "debug" }
