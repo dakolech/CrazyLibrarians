@@ -7,7 +7,7 @@ solution "Distracted Processing"
             language "C++"
             kind "ConsoleApp"
             files "src/**.cpp"
-            buildoptions { "-w -Wall -I/usr/include/openmpi" }
+            buildoptions { "-w -Wall -std=c++11 -I/usr/include/openmpi" }
             linkoptions { "-lmpi -lmpi_cxx" }
             objdir "obj/src"
 

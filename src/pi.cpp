@@ -3,12 +3,18 @@
 #include <openmpi/mpi.h>
 #include <math.h>
 
+#include <iostream>
+#include "ParserOpcji.hpp"
+using namespace std;
+
 #define POINTS 10000
 
 #define ROOT 0
 #define MSG_TAG 100
 
-int main(int argc,char **argv) {
+int main(int argc, char **argv) {
+    map<string, string> opcje = ParserOpcji::zczytajOpcjeUruchomienia(argc, argv);
+    
     int size,tid;
     int R;
 
