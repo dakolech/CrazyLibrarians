@@ -6,6 +6,7 @@
 #include <iostream>
 #include "Opcje.hpp"
 #include "Wyjatki.hpp"
+
 using namespace std;
 
 #define POINTS 10000

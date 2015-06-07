@@ -1,3 +1,12 @@
 #!/bin/bash
 
-mpirun -np 100 debug/CrazyLibrarians -b 100 -p 10
+BIBLIOTEKARZE=100
+
+if [ $# -eq 0 ]
+then
+    echo "Nie podano liczby bibliotekrzy - ustawiono domyślną wartość $BIBLIOTEKARZE"
+else
+    BIBLIOTEKARZE=$1
+fi
+
+mpirun -np $BIBLIOTEKARZE debug/CrazyLibrarians -b $BIBLIOTEKARZE
