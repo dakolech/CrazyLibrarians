@@ -1,10 +1,7 @@
 #ifndef PROCESAPLIKACYJNY
 #define PROCESAPLIKACYJNY
 
-#include "IWykonywalny.hpp"
-
-class ProcesAplikacyjny : public IWykonywalny {
-    //Bibliotekarz bibliotekarz;
+class ProcesAplikacyjny {
     int tid,
         liczbaBibliotekarzy;
     public:

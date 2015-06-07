@@ -2,8 +2,7 @@
 #include "ParserOpcji.hpp"
 #include "Wyjatki.hpp"
 
-Opcje::Opcje()
-    : liczbaMPC(10), liczbaDostepowDoMPC(10) {}
+Opcje::Opcje() : liczbaMPC(10) {}
 
 Opcje& Opcje::pobierzInstancje() {
     static Opcje instancja;
@@ -16,8 +15,6 @@ void Opcje::zaladujOpcjeProgramu(int argc, char *argv[], int liczbaBibliotakrzy)
 
     if (opcje.find("p") != opcje.end())
         liczbaMPC = stoul(opcje["p"]);
-    if (opcje.find("l") != opcje.end())
-        liczbaDostepowDoMPC = stoul(opcje["l"]);
         
     this->liczbaBibliotakrzy = liczbaBibliotakrzy;
 }
@@ -25,5 +22,3 @@ void Opcje::zaladujOpcjeProgramu(int argc, char *argv[], int liczbaBibliotakrzy)
 int Opcje::pobierzLiczbeBibliotekarzy() const { return liczbaBibliotakrzy; }
 
 int Opcje::pobierzLiczbeMPC() const { return liczbaMPC; }
-
-int Opcje::pobierzLiczbeDostepowDoMPC() const { return liczbaDostepowDoMPC; }

@@ -12,8 +12,7 @@ class Opcje {
     void operator=(Opcje const&) = delete;
 
     int liczbaBibliotakrzy,
-        liczbaMPC,
-        liczbaDostepowDoMPC;
+        liczbaMPC;
 
     public:
         static Opcje& pobierzInstancje();
@@ -22,7 +21,6 @@ class Opcje {
 
         int pobierzLiczbeBibliotekarzy() const;
         int pobierzLiczbeMPC() const;
-        int pobierzLiczbeDostepowDoMPC() const;
 };
 
 #endif

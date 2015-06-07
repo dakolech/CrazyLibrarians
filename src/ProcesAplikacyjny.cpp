@@ -18,7 +18,9 @@ void ProcesAplikacyjny::zaladuj(int argc, char *argv[]) {
 }
 
 void ProcesAplikacyjny::wykonaj() {
-    return;
+    while (true) {
+        1;
+    }
 }
 
 int ProcesAplikacyjny::pobierzTID() const {
