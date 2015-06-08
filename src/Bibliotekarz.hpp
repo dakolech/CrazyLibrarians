@@ -2,6 +2,7 @@
 #define BIBLIOTEKARZ
 
 #include "Definicje.hpp"
+#include <string>
 
 using namespace std;
 
@@ -12,6 +13,7 @@ class Bibliotekarz {
     };
     
     Bibliotekarz() = delete;
+    void wyswietlStan(string info) const;
     
     int liczbaDostepnychMPC, tidRodzica, wartoscZegaraLamporta;
     public:

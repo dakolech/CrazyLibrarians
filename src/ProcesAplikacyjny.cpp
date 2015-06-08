@@ -23,6 +23,10 @@ void ProcesAplikacyjny::zaladuj(int argc, char *argv[]) {
 void ProcesAplikacyjny::wykonaj() {
     while (true) {
         bibliotekarz->zajmujSieSoba();
+        bibliotekarz->odpowiedzInnymBibliotekarzom();
+        bibliotekarz->poprosODostepDoMPC();
+        bibliotekarz->uzywajMPC();
+        bibliotekarz->zwolnijMPC();
     }
 }
 
