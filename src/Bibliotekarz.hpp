@@ -3,6 +3,8 @@
 
 #include "Definicje.hpp"
 
+using namespace std;
+
 class Bibliotekarz {
     struct Wiadomosc {
         TypWiadomosci typ;
