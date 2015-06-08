@@ -1,7 +1,14 @@
 #ifndef BIBLIOTEKARZ
 #define BIBLIOTEKARZ
 
+#include "Definicje.hpp"
+
 class Bibliotekarz {
+    struct Wiadomosc {
+        TypWiadomosci typ;
+        int tidNadawcy, zegarLamporta, aktualnaLiczbaWolnychMPC;
+    };
+    
     Bibliotekarz() = delete;
     
     int liczbaDostepnychMPC, tidRodzica;
