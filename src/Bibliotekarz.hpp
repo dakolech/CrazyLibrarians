@@ -10,15 +10,16 @@ class Bibliotekarz {
         int tidNadawcy, zegarLamporta, aktualnaLiczbaWolnychMPC, liczbaCzytelnikowDoPonaglenia;
     };
 
-    struct Element {
+    struct ElementKolejki {
         int idProcesu, liczbaCzytelnikowDoPonaglenia;
         bool pozwolilem;
-    }
+    };
+
     Bibliotekarz() = delete;
     
     int liczbaDostepnychMPC, tidRodzica, wartoscZegaraLamporta, liczbaBibliotekarzy,
         liczbaCzytelnikowDoPonaglenia;
-    std::list<Wiadomosc> kolejka;
+    std::list<ElementKolejki> kolejka;
     public:
         Bibliotekarz(int tidRodzica);
 

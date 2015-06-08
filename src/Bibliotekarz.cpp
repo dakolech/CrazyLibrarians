@@ -38,17 +38,17 @@ void Bibliotekarz::poprosODostepDoMPC() {
             MPI_Recv(&odpowiedz, sizeof(odpowiedz), MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
             liczbaOdebranychWiadomosci++;
 
-            Element nowyElement;
-            nowyElement.idProcesu = iter.tidNadawcy;
-            nowyElement.liczbaCzytelnikowDoPonaglenia = iter.liczbaCzytelnikowDoPonaglenia;
+            ElementKolejki nowyElement;
+            nowyElement.idProcesu = odpowiedz.tidNadawcy;
+            nowyElement.liczbaCzytelnikowDoPonaglenia = odpowiedz.liczbaCzytelnikowDoPonaglenia;
             nowyElement.pozwolilem = false;
 
-            for( list<int>::iterator iter=lista.begin(); iter != lista.end(); iter++ )
-                if ((iter.liczbaCzytelnikowDoPonaglenia > liczbaCzytelnikowDoPonaglenia &&
-                        iter.pozwolilem == false)
+            for( list<ElementKolejki>::iterator iter=kolejka.begin(); iter != kolejka.end(); iter++ )
+                if ((iter->liczbaCzytelnikowDoPonaglenia > liczbaCzytelnikowDoPonaglenia &&
+                        iter->pozwolilem == false)
                     ||
-                    (iter.liczbaCzytelnikowDoPonaglenia == liczbaCzytelnikowDoPonaglenia &&
-                        iter.tidNadawcy > tidRodzica && iter.pozwolilem == false))
+                    (iter->liczbaCzytelnikowDoPonaglenia == liczbaCzytelnikowDoPonaglenia &&
+                        iter->idProcesu > tidRodzica && iter->pozwolilem == false))
                   kolejka.insert(iter, nowyElement);
         }
 
