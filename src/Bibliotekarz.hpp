@@ -11,7 +11,7 @@ class Bibliotekarz {
     
     Bibliotekarz() = delete;
     
-    int liczbaDostepnychMPC, tidRodzica;
+    int liczbaDostepnychMPC, tidRodzica, wartoscZegaraLamporta;
     public:
         Bibliotekarz(int tidRodzica);
         
