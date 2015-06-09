@@ -8,7 +8,7 @@
 
 Bibliotekarz::Bibliotekarz(int tidRodzica)
     : tidRodzica(tidRodzica), liczbaDostepnychMPC(Opcje::pobierzInstancje().pobierzLiczbeMPC()),
-      wartoscZegaraLamporta(0), liczbaCzytelnikowDoPonaglenia(0) { }
+      wartoscZegaraLamporta(0), liczbaCzytelnikowDoPonaglenia(0), iloscPotwierdzen(0) { }
 
 void Bibliotekarz::zajmujSieSoba() const {
     wyswietlStan("Zajmuję się sobą");
@@ -94,4 +94,39 @@ void Bibliotekarz::wyswietlStan(string info) const {
     cout << "[Zegar: " << setw(4) << wartoscZegaraLamporta << "]"
          << "[tid: " << setw(4) << tidRodzica << "]"
          << info << "\n";
+}
+
+void Bibliotekarz::obsluzWiadomosci() {
+    int flag = 0;
+    Wiadomosc odpowiedz;
+    MPI_Status status;
+    MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+    while (flag) {
+        MPI_Recv(&odpowiedz, sizeof(odpowiedz), MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        obsluzWiadomosc(odpowiedz);
+        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
+    }
+}
+
+void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
+    switch (wiadomosc.typ) {
+        case RZADANIE:
+            osbluzRzadanie(wiadomosc);
+            break;
+        case POTWIERDZENIE:
+            //pamietać o wyzerowaniu
+            ++iloscPotwierdzen;
+            break;
+        case ZABRANIE_MPC:
+            liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            break;
+        case ZWOLNIENIE_MPC:
+            liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            break;
+        }
+    wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
+}
+
+void Bibliotekarz::osbluzRzadanie(Wiadomosc wiadomosc) {
+    //TODO
 }

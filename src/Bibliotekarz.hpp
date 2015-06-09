@@ -28,7 +28,7 @@ class Bibliotekarz {
     
     list<ElementListy> lista;
     int liczbaDostepnychMPC, tidRodzica, wartoscZegaraLamporta,
-        liczbaCzytelnikowDoPonaglenia;
+        liczbaCzytelnikowDoPonaglenia, iloscPotwierdzen;
     public:
         Bibliotekarz(int tidRodzica);
 
@@ -37,6 +37,9 @@ class Bibliotekarz {
         void poprosODostepDoMPC();
         void uzywajMPC();
         void zwolnijMPC();
+        void obsluzWiadomosci();
+        void obsluzWiadomosc(Wiadomosc wiadomosc);
+        void osbluzRzadanie(Wiadomosc wiadomosc);
 };
 
 #endif
