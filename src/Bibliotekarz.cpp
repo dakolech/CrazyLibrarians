@@ -50,13 +50,7 @@ void Bibliotekarz::zwolnijMPC() {
     
     MPI_Status status;
     // czekaj na potwierdzenia od wszystkich
-    for (int i = 0; i < Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy() - 1; ++i) {
-        MPI_Recv(&wiadomosc, sizeof(Wiadomosc), MPI_BYTE, MPI_ANY_SOURCE, TypWiadomosci::POTWIERDZENIE,
-                 MPI_COMM_WORLD, &status);
-
-        // synchronizacja zegarów
-        this->wartoscZegaraLamporta = max(this->wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
-    }
+    /* TO DO */
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
