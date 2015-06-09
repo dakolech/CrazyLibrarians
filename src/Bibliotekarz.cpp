@@ -29,7 +29,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
     liczbaCzytelnikowDoPonaglenia = rand()%100 + 1;
     this->obsluzRzadanie(tid, liczbaCzytelnikowDoPonaglenia);
     // broadcast ŻĄDANIA
-    Wiadomosc zapytanie(RZADANIE, tid, 0, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
+    Wiadomosc zapytanie(RZADANIE, tid, 0, ++wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
     this->rozeslijWszystkim(zapytanie);
     // czekaj na potwierdzenia od wszystkich
     while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
@@ -38,18 +38,16 @@ void Bibliotekarz::poprosODostepDoMPC() {
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
-    /* TO DO */
+    while (!czyMogeWejscDoSekcji()) {
+        obsluzWiadomosci();
+    }
     
     // sekcja krytyczna
     --this->liczbaDostepnychMPC;
     
     // broadcast informacji o zabraniu MPC wraz z nową wartością liczby dostępnych MPC
     Wiadomosc zabranieMPC(ZABRANIE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
-    for (int i = 0; i < LICZBA_BIBLIOTEKARZY; ++i) {
-        if (i != tid) {
-            MPI_Send(&zabranieMPC, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::ZABRANIE_MPC, MPI_COMM_WORLD);
-        }
-    }
+    this->rozeslijWszystkim(zabranieMPC);
 }
 
 void Bibliotekarz::uzywajMPC() {
@@ -66,7 +64,7 @@ void Bibliotekarz::zwolnijMPC() {
     // dodaj własne ŻĄDANIE do kolejki (chcę zwolnić MPC)
     this->obsluzRzadanie(tid, 0);
     // broadcast ŻĄDANIA
-    Wiadomosc rzadanieDostepu(RZADANIE, tid, 0, wartoscZegaraLamporta, 0);
+    Wiadomosc rzadanieDostepu(RZADANIE, tid, 0, ++wartoscZegaraLamporta, 0);
     this->rozeslijWszystkim(rzadanieDostepu);    
     // czekaj na potwierdzenia od wszystkich
     while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
@@ -120,7 +118,7 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
         case ZWOLNIENIE_MPC:
             liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
             break;
-        }
+    }
     wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
 }
 
@@ -150,5 +148,8 @@ void Bibliotekarz::rozeslijWszystkim(Wiadomosc wiadomosc) {
 }
 
 bool Bibliotekarz::czyMogeWejscDoSekcji() const {
-    
+    ElementListy el = lista.front();
+    if (el.tid == tid)
+        return true;
+    return false;
 }
