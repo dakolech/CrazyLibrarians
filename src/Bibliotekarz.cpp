@@ -8,7 +8,7 @@
 
 Bibliotekarz::Bibliotekarz(int tidRodzica)
     : tidRodzica(tidRodzica), liczbaDostepnychMPC(Opcje::pobierzInstancje().pobierzLiczbeMPC()),
-      wartoscZegaraLamporta(0), liczbaCzytelnikowDoPonaglenia(0) { }
+      wartoscZegaraLamporta(0), liczbaCzytelnikowDoPonaglenia(0), iloscPotwierdzen(0) { }
 
 void Bibliotekarz::zajmujSieSoba() const {
     wyswietlStan("Zajmuję się sobą");
@@ -124,21 +124,24 @@ void Bibliotekarz::obsluzWiadomosci() {
 }
 
 void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
-    switch(wiadomosc.typ) {
-          case RZADANIE:
-              osbluzRzadanie(wiadomosc);
-              break;
-          case POTWIERDZENIE:
-              //pamietać o wyzerowaniu
-              ++iloscPotwierdzen;
-              break;
-          case ZABRANIE_MPC: case ZWOLNIENIE_MPC:
-              liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
-              break;
+    switch (wiadomosc.typ) {
+        case RZADANIE:
+            osbluzRzadanie(wiadomosc);
+            break;
+        case POTWIERDZENIE:
+            //pamietać o wyzerowaniu
+            ++iloscPotwierdzen;
+            break;
+        case ZABRANIE_MPC:
+            liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            break;
+        case ZWOLNIENIE_MPC:
+            liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            break;
         }
     wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
 }
 
 void Bibliotekarz::osbluzRzadanie(Wiadomosc wiadomosc) {
-  //TODO
+    //TODO
 }
