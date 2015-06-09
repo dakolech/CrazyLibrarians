@@ -26,29 +26,28 @@ void Bibliotekarz::poprosODostepDoMPC() {
     liczbaCzytelnikowDoPonaglenia = rand()%100 + 1;
     Wiadomosc zapytanie(RZADANIE, tidRodzica, 0, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
 
+    // broadcast ŻĄDANIA
     wyswietlStan("Proszę o dostęp do MPC");
     for(int i = 0; i < LICZBA_BIBLIOTEKARZY; i++) {
         MPI_Send(&zapytanie, sizeof(zapytanie), MPI_BYTE, i, TypWiadomosci::RZADANIE, MPI_COMM_WORLD);
     }
 
-    bool koniec = false;
-    int liczbaOdebranychWiadomosci = 0;
-    while(!koniec) {
-        int flag = 0;
-        Wiadomosc odpowiedz;
-        MPI_Status status;
-        MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
-        if (flag) {
-            MPI_Recv(&odpowiedz, sizeof(odpowiedz), MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-            liczbaOdebranychWiadomosci++;
-
-            ElementListy nowyElement;
-            nowyElement.idProcesu = odpowiedz.tidNadawcy;
-            nowyElement.liczbaCzytelnikowDoPonaglenia = odpowiedz.liczbaCzytelnikowDoPonaglenia;
+    // czekaj na potwierdzenia od wszystkich
+    /* TO DO */
+    
+    // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
+    // na odbiór wiadomości o zwolnieniu sekcji krytycznej
+    /* TO DO */
+    
+    // sekcja krytyczna
+    --this->liczbaDostepnychMPC;
+    
+    // broadcast informacji o zabraniu MPC wraz z nową wartością liczby dostępnych MPC
+    Wiadomosc zabranieMPC(ZABRANIE_MPC, tidRodzica, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
+    for (int i = 0; i < LICZBA_BIBLIOTEKARZY; ++i) {
+        if (i != tidRodzica) {
+            MPI_Send(&zabranieMPC, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::ZABRANIE_MPC, MPI_COMM_WORLD);
         }
-
-        if (liczbaOdebranychWiadomosci >= LICZBA_BIBLIOTEKARZY)
-          koniec = true;
     }
 }
 
@@ -60,11 +59,12 @@ void Bibliotekarz::uzywajMPC() {
 }
 
 void Bibliotekarz::zwolnijMPC() {
-    wyswietlStan("Chcę zwolnić swojego MPC (koniec używania)");
-    
+    const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
     Wiadomosc zadanieDostepu(RZADANIE, tidRodzica, 0, wartoscZegaraLamporta, 0);
+    
+    wyswietlStan("Chcę zwolnić swojego MPC (koniec używania)");
     // broadcast ŻĄDANIA
-    for (int i = 0; i < Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy(); ++i) {
+    for (int i = 0; i < LICZBA_BIBLIOTEKARZY; ++i) {
         if (i != tidRodzica) {
             MPI_Send(&zadanieDostepu, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::RZADANIE, MPI_COMM_WORLD);
         }
