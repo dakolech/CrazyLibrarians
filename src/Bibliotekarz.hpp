@@ -29,6 +29,7 @@ class Bibliotekarz {
     void kolejkujRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
     void odpowiedzNaRzadanie(int tidAdresata);
     void rozeslijWszystkim(Wiadomosc wiadomosc);
+    void usunRzadanieZKolejki(int tid);
     void wyswietlStan(string info) const;
     bool czyMogeWejscDoSekcji() const;
         

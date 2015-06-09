@@ -33,7 +33,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
     string info = "Proszę o dostęp do MPC (do ponaglenia: " + to_string(liczbaCzytelnikowDoPonaglenia) + ")";
     wyswietlStan(info);
     // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
-    this->kolejkujRzadanie(tid, liczbaCzytelnikowDoPonaglenia);
+    lista.push_back(ElementListy{tid, liczbaCzytelnikowDoPonaglenia});
     // broadcast ŻĄDANIA
     Wiadomosc zapytanie(RZADANIE, tid, 0, ++wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
     this->rozeslijWszystkim(zapytanie);
@@ -41,14 +41,15 @@ void Bibliotekarz::poprosODostepDoMPC() {
     while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
         obsluzWiadomosci();
     }
+    liczbaPotwierdzen = 0;
     
     wyswietlStan("Zebrałem wszystkie potwierdzenia (do zabrania)");
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
-    while (!czyMogeWejscDoSekcji()) {
+    do {
         obsluzWiadomosci();
-    }
+    } while (!czyMogeWejscDoSekcji() || liczbaDostepnychMPC == 0);
     
     // sekcja krytyczna
     wyswietlStan("Jestem w sekcji krytycznej (zabrałem MPC)");
@@ -80,14 +81,15 @@ void Bibliotekarz::zwolnijMPC() {
     while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
         obsluzWiadomosci();
     }
+    liczbaPotwierdzen = 0;
     
     wyswietlStan("Zebrałem wszystkie potwierdzenia (do zwolnienia)");
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
-    while (!czyMogeWejscDoSekcji()) {
+    do {
         obsluzWiadomosci();
-    }
+    } while (!czyMogeWejscDoSekcji());
     
     // sekcja krytyczna
     wyswietlStan("Jestem w sekcji krytycznej (zwalnianie)");
@@ -96,12 +98,6 @@ void Bibliotekarz::zwolnijMPC() {
     // broadcast informacji o zwolnieniu MPC wraz z nową wartością liczby dostępnych MPC
     Wiadomosc zwolnienieMPC(ZWOLNIENIE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
     this->rozeslijWszystkim(zwolnienieMPC);
-}
-
-void Bibliotekarz::wyswietlStan(string info) const {
-    cout << "[Zegar: " << setw(4) << wartoscZegaraLamporta << "]"
-         << "[tid: " << setw(4) << tid << "]"
-         << info << "\n";
 }
 
 void Bibliotekarz::obsluzWiadomosci() {
@@ -128,9 +124,11 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
             break;
         case ZABRANIE_MPC:
             liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            usunRzadanieZKolejki(wiadomosc.tid);
             break;
         case ZWOLNIENIE_MPC:
             liczbaDostepnychMPC = wiadomosc.aktualnaLiczbaWolnychMPC;
+            usunRzadanieZKolejki(wiadomosc.tid);
             break;
     }
     wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
@@ -166,9 +164,25 @@ void Bibliotekarz::rozeslijWszystkim(Wiadomosc wiadomosc) {
     }
 }
 
+void Bibliotekarz::usunRzadanieZKolejki(int tid) {
+    for (auto it = lista.begin(); it != lista.end(); ++it) {
+        if (it->tid == tid) {
+            lista.erase(it);
+            break;
+        }
+    }
+}
+
 bool Bibliotekarz::czyMogeWejscDoSekcji() const {
     ElementListy el = lista.front();
     if (el.tid == tid)
         return true;
     return false;
+}
+
+void Bibliotekarz::wyswietlStan(string info) const {
+    cout << setw(4) << wartoscZegaraLamporta << " | "
+         << "MPCs: " << setw(4) << liczbaDostepnychMPC << " | "
+         << "tid: " << setw(4) << tid << " | "
+         << info << "\n";
 }
