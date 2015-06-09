@@ -10,25 +10,30 @@ using namespace std;
 class Bibliotekarz {
     struct Wiadomosc {
         TypWiadomosci typ;
-        int tidNadawcy, zegarLamporta, aktualnaLiczbaWolnychMPC,
+        int tid, zegarLamporta, aktualnaLiczbaWolnychMPC,
             liczbaCzytelnikowDoPonaglenia;
 
         Wiadomosc() { }
         Wiadomosc(TypWiadomosci typ, int tid, int MPCs, int lamport, int czytelnicy)
-            : typ(typ), tidNadawcy(tid), aktualnaLiczbaWolnychMPC(MPCs), zegarLamporta(lamport), 
+            : typ(typ), tid(tid), aktualnaLiczbaWolnychMPC(MPCs), zegarLamporta(lamport), 
               liczbaCzytelnikowDoPonaglenia(czytelnicy) { };
     };
 
     struct ElementListy {
-        int idProcesu, liczbaCzytelnikowDoPonaglenia;
+        int tid, liczbaCzytelnikowDoPonaglenia;
     };
-
-    Bibliotekarz() = delete;
-    void wyswietlStan(string info) const;
     
+    Bibliotekarz() = delete;
+    void obsluzWiadomosci();
+    void obsluzWiadomosc(Wiadomosc wiadomosc);
+    void obsluzRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
+    void rozeslijWszystkim(Wiadomosc wiadomosc);
+    void wyswietlStan(string info) const;
+    bool czyMogeWejscDoSekcji() const;
+        
     list<ElementListy> lista;
-    int liczbaDostepnychMPC, tidRodzica, wartoscZegaraLamporta,
-        liczbaCzytelnikowDoPonaglenia, iloscPotwierdzen;
+    int liczbaDostepnychMPC, tid, wartoscZegaraLamporta,
+        liczbaCzytelnikowDoPonaglenia, liczbaPotwierdzen;
     public:
         Bibliotekarz(int tidRodzica);
 
@@ -37,9 +42,6 @@ class Bibliotekarz {
         void poprosODostepDoMPC();
         void uzywajMPC();
         void zwolnijMPC();
-        void obsluzWiadomosci();
-        void obsluzWiadomosc(Wiadomosc wiadomosc);
-        void osbluzRzadanie(Wiadomosc wiadomosc);
 };
 
 #endif
