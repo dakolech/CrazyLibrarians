@@ -38,7 +38,7 @@ class Bibliotekarz {
     public:
         Bibliotekarz(int tidRodzica);
 
-        void zajmujSieSoba() const;
+        void zajmujSieSoba();
         void odpowiedzInnymBibliotekarzom();
         void poprosODostepDoMPC();
         void uzywajMPC();

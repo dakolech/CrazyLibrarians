@@ -10,15 +10,20 @@ Bibliotekarz::Bibliotekarz(int tidRodzica)
     : tid(tidRodzica), liczbaDostepnychMPC(Opcje::pobierzInstancje().pobierzLiczbeMPC()),
       wartoscZegaraLamporta(0), liczbaCzytelnikowDoPonaglenia(0), liczbaPotwierdzen(0) { }
 
-void Bibliotekarz::zajmujSieSoba() const {
+void Bibliotekarz::zajmujSieSoba() {
     wyswietlStan("Zajmuję się sobą");
     
     int microseconds = rand()%4900000 + 100000;
     usleep(microseconds);
+    ++wartoscZegaraLamporta;
 }
 
 void Bibliotekarz::odpowiedzInnymBibliotekarzom() {
     wyswietlStan("Odpowiadam na żądania innych bibliotekarzy");
+    
+    this->obsluzWiadomosci();
+    
+    ++wartoscZegaraLamporta;
 }
 
 void Bibliotekarz::poprosODostepDoMPC() {
@@ -37,7 +42,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
         obsluzWiadomosci();
     }
     
-    wyswietlStan("Zebrałem wszystkie potwierdzenia");
+    wyswietlStan("Zebrałem wszystkie potwierdzenia (do zabrania)");
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
@@ -46,6 +51,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
     }
     
     // sekcja krytyczna
+    wyswietlStan("Jestem w sekcji krytycznej (zabrałem MPC)");
     --this->liczbaDostepnychMPC;
     
     // broadcast informacji o zabraniu MPC wraz z nową wartością liczby dostępnych MPC
@@ -58,6 +64,7 @@ void Bibliotekarz::uzywajMPC() {
     
     int microseconds = rand()%4900000 + 100000;
     usleep(microseconds);
+    ++wartoscZegaraLamporta;
 }
 
 void Bibliotekarz::zwolnijMPC() {
@@ -74,6 +81,8 @@ void Bibliotekarz::zwolnijMPC() {
         obsluzWiadomosci();
     }
     
+    wyswietlStan("Zebrałem wszystkie potwierdzenia (do zwolnienia)");
+    
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
     while (!czyMogeWejscDoSekcji()) {
@@ -81,6 +90,7 @@ void Bibliotekarz::zwolnijMPC() {
     }
     
     // sekcja krytyczna
+    wyswietlStan("Jestem w sekcji krytycznej (zwalnianie)");
     ++this->liczbaDostepnychMPC;
     
     // broadcast informacji o zwolnieniu MPC wraz z nową wartością liczby dostępnych MPC
