@@ -23,11 +23,12 @@ void Bibliotekarz::odpowiedzInnymBibliotekarzom() {
 
 void Bibliotekarz::poprosODostepDoMPC() {
     const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
-    
-    wyswietlStan("Proszę o dostęp do MPC");
-    // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
     liczbaCzytelnikowDoPonaglenia = rand()%100 + 1;
-    this->obsluzRzadanie(tid, liczbaCzytelnikowDoPonaglenia);
+    
+    string info = "Proszę o dostęp do MPC (do ponaglenia: " + to_string(liczbaCzytelnikowDoPonaglenia) + ")";
+    wyswietlStan(info);
+    // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
+    this->kolejkujRzadanie(tid, liczbaCzytelnikowDoPonaglenia);
     // broadcast ŻĄDANIA
     Wiadomosc zapytanie(RZADANIE, tid, 0, ++wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
     this->rozeslijWszystkim(zapytanie);
@@ -35,6 +36,8 @@ void Bibliotekarz::poprosODostepDoMPC() {
     while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
         obsluzWiadomosci();
     }
+    
+    wyswietlStan("Zebrałem wszystkie potwierdzenia");
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
@@ -62,7 +65,7 @@ void Bibliotekarz::zwolnijMPC() {
     
     wyswietlStan("Chcę zwolnić swojego MPC (koniec używania)");
     // dodaj własne ŻĄDANIE do kolejki (chcę zwolnić MPC)
-    this->obsluzRzadanie(tid, 0);
+    this->kolejkujRzadanie(tid, 0);
     // broadcast ŻĄDANIA
     Wiadomosc rzadanieDostepu(RZADANIE, tid, 0, ++wartoscZegaraLamporta, 0);
     this->rozeslijWszystkim(rzadanieDostepu);    
@@ -106,7 +109,8 @@ void Bibliotekarz::obsluzWiadomosci() {
 void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
     switch (wiadomosc.typ) {
         case RZADANIE:
-            obsluzRzadanie(wiadomosc.tid, wiadomosc.liczbaCzytelnikowDoPonaglenia);
+            kolejkujRzadanie(wiadomosc.tid, wiadomosc.liczbaCzytelnikowDoPonaglenia);
+            odpowiedzNaRzadanie(wiadomosc.tid);
             break;
         case POTWIERDZENIE:
             //pamietać o wyzerowaniu
@@ -122,7 +126,7 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
     wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.zegarLamporta) + 1;
 }
 
-void Bibliotekarz::obsluzRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia) {
+void Bibliotekarz::kolejkujRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia) {
     if (lista.empty()) {
         lista.push_front(ElementListy{tid, liczbaCzytelnikowDoPonaglenia});
     } else {
@@ -136,6 +140,11 @@ void Bibliotekarz::obsluzRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia) {
         }
         lista.push_back(ElementListy{tid, liczbaCzytelnikowDoPonaglenia});
     }
+}
+
+void Bibliotekarz::odpowiedzNaRzadanie(int tidAdresata) {
+    Wiadomosc w(POTWIERDZENIE, tid, 0, ++wartoscZegaraLamporta, 0);
+    MPI_Send(&w, sizeof(Wiadomosc), MPI_BYTE, tidAdresata, POTWIERDZENIE, MPI_COMM_WORLD);
 }
 
 void Bibliotekarz::rozeslijWszystkim(Wiadomosc wiadomosc) {

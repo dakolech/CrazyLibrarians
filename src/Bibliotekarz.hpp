@@ -26,7 +26,8 @@ class Bibliotekarz {
     Bibliotekarz() = delete;
     void obsluzWiadomosci();
     void obsluzWiadomosc(Wiadomosc wiadomosc);
-    void obsluzRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
+    void kolejkujRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
+    void odpowiedzNaRzadanie(int tidAdresata);
     void rozeslijWszystkim(Wiadomosc wiadomosc);
     void wyswietlStan(string info) const;
     bool czyMogeWejscDoSekcji() const;
