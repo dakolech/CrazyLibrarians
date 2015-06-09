@@ -12,6 +12,11 @@ class Bibliotekarz {
         TypWiadomosci typ;
         int tidNadawcy, zegarLamporta, aktualnaLiczbaWolnychMPC,
             liczbaCzytelnikowDoPonaglenia;
+
+        Wiadomosc() { }
+        Wiadomosc(TypWiadomosci typ, int tid, int MPCs, int lamport, int czytelnicy)
+            : typ(typ), tidNadawcy(tid), aktualnaLiczbaWolnychMPC(MPCs), zegarLamporta(lamport), 
+              liczbaCzytelnikowDoPonaglenia(czytelnicy) { };
     };
 
     struct ElementListy {

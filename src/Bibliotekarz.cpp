@@ -22,18 +22,11 @@ void Bibliotekarz::odpowiedzInnymBibliotekarzom() {
 }
 
 void Bibliotekarz::poprosODostepDoMPC() {
-    wyswietlStan("Proszę o dostęp do MPC");
-    
     const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
-    
     liczbaCzytelnikowDoPonaglenia = rand()%100 + 1;
-    Wiadomosc zapytanie;
-    zapytanie.typ = RZADANIE;
-    zapytanie.tidNadawcy = tidRodzica;
-    zapytanie.zegarLamporta = wartoscZegaraLamporta;
-    zapytanie.aktualnaLiczbaWolnychMPC = liczbaDostepnychMPC;
-    zapytanie.liczbaCzytelnikowDoPonaglenia = liczbaCzytelnikowDoPonaglenia;
+    Wiadomosc zapytanie(RZADANIE, tidRodzica, 0, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia);
 
+    wyswietlStan("Proszę o dostęp do MPC");
     for(int i = 0; i < LICZBA_BIBLIOTEKARZY; i++) {
         MPI_Send(&zapytanie, sizeof(zapytanie), MPI_BYTE, i, TypWiadomosci::RZADANIE, MPI_COMM_WORLD);
     }
@@ -69,16 +62,11 @@ void Bibliotekarz::uzywajMPC() {
 void Bibliotekarz::zwolnijMPC() {
     wyswietlStan("Chcę zwolnić swojego MPC (koniec używania)");
     
-    // wypełnij obiekt wiadomości danymi
-    Wiadomosc wiadomosc;
-    wiadomosc.typ = TypWiadomosci::RZADANIE;
-    wiadomosc.tidNadawcy = this->tidRodzica;
-    wiadomosc.zegarLamporta = ++this->wartoscZegaraLamporta;
-    wiadomosc.liczbaCzytelnikowDoPonaglenia = 0;
+    Wiadomosc zadanieDostepu(RZADANIE, tidRodzica, 0, wartoscZegaraLamporta, 0);
     // broadcast ŻĄDANIA
     for (int i = 0; i < Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy(); ++i) {
         if (i != tidRodzica) {
-            MPI_Send(&wiadomosc, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::RZADANIE, MPI_COMM_WORLD);
+            MPI_Send(&zadanieDostepu, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::RZADANIE, MPI_COMM_WORLD);
         }
     }
     
@@ -94,13 +82,10 @@ void Bibliotekarz::zwolnijMPC() {
     ++this->liczbaDostepnychMPC;
     
     // broadcast informacji o zwolnieniu MPC wraz z nową wartością liczby dostępnych MPC
-    wiadomosc.typ = TypWiadomosci::ZWOLNIENIE_MPC;
-    wiadomosc.tidNadawcy = this->tidRodzica;
-    wiadomosc.zegarLamporta = ++this->wartoscZegaraLamporta;
-    wiadomosc.aktualnaLiczbaWolnychMPC = this->liczbaDostepnychMPC;
+    Wiadomosc zwolnienieMPC(ZWOLNIENIE_MPC, tidRodzica, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
     for (int i = 0; i < Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy(); ++i) {
         if (i != tidRodzica) {
-            MPI_Send(&wiadomosc, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::ZWOLNIENIE_MPC, MPI_COMM_WORLD);
+            MPI_Send(&zwolnienieMPC, sizeof(Wiadomosc), MPI_BYTE, i, TypWiadomosci::ZWOLNIENIE_MPC, MPI_COMM_WORLD);
         }
     }
 }
