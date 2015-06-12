@@ -10,23 +10,21 @@ using namespace std;
 class Bibliotekarz {
     struct Wiadomosc {
         TypWiadomosci typ;
-        int tid, zegarLamporta, aktualnaLiczbaWolnychMPC,
-            liczbaCzytelnikowDoPonaglenia;
+        int tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia;
 
         Wiadomosc() { }
-        Wiadomosc(TypWiadomosci typ, int tid, int MPCs, int lamport, int czytelnicy)
-            : typ(typ), tid(tid), aktualnaLiczbaWolnychMPC(MPCs), zegarLamporta(lamport), 
-              liczbaCzytelnikowDoPonaglenia(czytelnicy) { };
+        Wiadomosc(TypWiadomosci typ, int tid, int lamport, int czytelnicy)
+            : typ(typ), tid(tid), wartoscZegaraLamporta(lamport), liczbaCzytelnikowDoPonaglenia(czytelnicy) { };
     };
 
     struct ElementListy {
-        int tid, liczbaCzytelnikowDoPonaglenia;
+        int tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia;
     };
     
     Bibliotekarz() = delete;
     void obsluzWiadomosci();
     void obsluzWiadomosc(Wiadomosc wiadomosc);
-    void kolejkujRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
+    void kolejkujRzadanie(Wiadomosc wiadomosc);
     void odpowiedzNaRzadanie(int tidAdresata);
     void rozeslijWszystkim(Wiadomosc wiadomosc);
     void usunRzadanieZKolejki(int tid);
@@ -34,8 +32,7 @@ class Bibliotekarz {
     bool czyMogeWejscDoSekcji() const;
         
     list<ElementListy> lista;
-    int liczbaDostepnychMPC, tid, wartoscZegaraLamporta,
-        liczbaCzytelnikowDoPonaglenia, liczbaPotwierdzen;
+    int tid, wartoscZegaraLamporta;
     public:
         Bibliotekarz(int tidRodzica);
 
