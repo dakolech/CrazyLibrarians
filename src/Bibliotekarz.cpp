@@ -89,30 +89,11 @@ void Bibliotekarz::poprosODostepDoMPC() {
     
     wyswietlStan("Zebrałem wszystkie potwierdzenia (do zabrania)");
     
-    /*
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
     do {
         obsluzWiadomosci();
-    } while (!czyMogeWejscDoSekcji() || liczbaDostepnychMPC == 0);
-    
-    // sekcja krytyczna
-    wyswietlStan("Jestem w sekcji krytycznej (zabrałem MPC)");
-    
-    Wiadomosc alert(ZARAZ_ZABIORE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
-    this->rozeslijWszystkim(alert);
-    while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
-        obsluzWiadomosci();
-    }
-    liczbaPotwierdzen = 0;
-    
-    wyswietlStan("Zmieniam wartość zmiennej: liczbaDostepnychMPC (--)");
-    --this->liczbaDostepnychMPC;
-    
-    // broadcast informacji o zabraniu MPC wraz z nową wartością liczby dostępnych MPC
-    Wiadomosc zabranieMPC(ZABRANIE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
-    this->rozeslijWszystkim(zabranieMPC);
-    */
+    } while (!czyMogeWejscDoSekcji());
 }
 
 void Bibliotekarz::uzywajMPC() {
