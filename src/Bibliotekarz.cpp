@@ -78,7 +78,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
     kolejkujRzadanie(wlasneRzadanie);
     
     // broadcast ŻĄDANIA
-    Wiadomosc rzadanie = { RZADANIE, tid, ++wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
+    Wiadomosc rzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
     this->rozeslijWszystkim(rzadanie);
     
     // czekaj na potwierdzenia od wszystkich
@@ -87,7 +87,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
 
     this->liczbaPotwierdzen = 0;
     
-    wyswietlStan("Zebrałem wszystkie potwierdzenia (do zabrania)");
+    wyswietlStan("Zebrałem wszystkie potwierdzenia");
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
@@ -97,7 +97,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
 }
 
 void Bibliotekarz::uzywajMPC() {
-    wyswietlStan("Używam MPC");
+    wyswietlStan("\033[31mUŻYWAM MPC\033[m");
     
     int microseconds = rand()%490000 + 10000;
     usleep(microseconds);
@@ -145,7 +145,13 @@ void Bibliotekarz::uzywajMPC() {
 }*/
 
 void Bibliotekarz::zwolnijMPC() {
-    wyswietlStan("ATRAPA Zwalniam swojego MPC");
+    wyswietlStan("\033[32mZWALNIAM MPC\033[m");
+    
+    // usuń własne żądanie z kolejki
+    lista.pop_front();
+    // broadcast ZWOLNIENIA MPC
+    Wiadomosc zwolnienie = { ZWOLNIENIE_MPC, tid, ++wartoscZegaraLamporta, 0 };
+    this->rozeslijWszystkim(zwolnienie);
 }
 
 void Bibliotekarz::obsluzWiadomosci() {
@@ -168,6 +174,7 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
             break;
         case POTWIERDZENIE:
             ++this->liczbaPotwierdzen;
+            break;
         case ZWOLNIENIE_MPC:
             usunRzadanieZKolejki(wiadomosc[PolaWiadomosci::TID]);
             break;
@@ -198,15 +205,15 @@ void Bibliotekarz::kolejkujRzadanie(Wiadomosc w) {
 }
 
 void Bibliotekarz::odpowiedzNaRzadanie(int tidAdresata) {
-    Wiadomosc w = {POTWIERDZENIE, tid, ++wartoscZegaraLamporta, 0};
-    MPI_Send(&w, PolaWiadomosci::LICZBA_POL, MPI_INT, tidAdresata, POTWIERDZENIE, MPI_COMM_WORLD);
+    Wiadomosc w = { POTWIERDZENIE, tid, ++wartoscZegaraLamporta, 0 };
+    MPI_Send(w, PolaWiadomosci::LICZBA_POL, MPI_INT, tidAdresata, POTWIERDZENIE, MPI_COMM_WORLD);
 }
 
 void Bibliotekarz::rozeslijWszystkim(Wiadomosc wiadomosc) {
     const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
     for (int i = 0; i < LICZBA_BIBLIOTEKARZY; ++i) {
         if (i != tid) {
-            MPI_Send(&wiadomosc, PolaWiadomosci::LICZBA_POL, MPI_INT, i, wiadomosc[PolaWiadomosci::TYP], MPI_COMM_WORLD);
+            MPI_Send(wiadomosc, PolaWiadomosci::LICZBA_POL, MPI_INT, i, wiadomosc[PolaWiadomosci::TYP], MPI_COMM_WORLD);
         }
     }
 }
@@ -228,7 +235,24 @@ bool Bibliotekarz::czyMogeWejscDoSekcji() const {
 }
 
 void Bibliotekarz::wyswietlStan(string info) const {
+    const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
+    
     cout << setw(4) << wartoscZegaraLamporta << " | "
          << "tid: " << setw(4) << tid << " | "
-         << info << "\n";
+         << "kolejka: ";
+
+    if (lista.size() > 0) {
+        for (auto &e : lista)
+            cout << e.tid << " ";
+    }
+    cout << string(2*(LICZBA_BIBLIOTEKARZY - lista.size()), ' ') << "| ";
+        
+    cout << info << "\n";
 }
+
+
+
+
+
+
+
