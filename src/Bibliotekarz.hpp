@@ -35,7 +35,7 @@ class Bibliotekarz {
     bool czyMogeWejscDoSekcji() const;
         
     list<ElementListy> lista;
-    int tid, wartoscZegaraLamporta;
+    int tid, wartoscZegaraLamporta, liczbaPotwierdzen;
     public:
         Bibliotekarz(int tidRodzica);
 

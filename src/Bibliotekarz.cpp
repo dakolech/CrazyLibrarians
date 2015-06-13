@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 Bibliotekarz::Bibliotekarz(int tidRodzica)
-    : tid(tidRodzica), wartoscZegaraLamporta(0) { }
+    : tid(tidRodzica), wartoscZegaraLamporta(0), liczbaPotwierdzen(0) { }
 
 void Bibliotekarz::zajmujSieSoba() {
     wyswietlStan("Zajmuję się sobą");
@@ -68,13 +68,56 @@ void Bibliotekarz::odpowiedzInnymBibliotekarzom() {
 }*/
 
 void Bibliotekarz::poprosODostepDoMPC() {
-    wyswietlStan("ATRAPA Proszę o dostęp do MPC");
+    const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
+    int liczbaCzytelnikowDoPonaglenia = rand()%100 + 1;
+    
+    wyswietlStan("Proszę o dostęp do MPC (do ponaglenia: " + to_string(liczbaCzytelnikowDoPonaglenia) + ")");
+    
+    // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
+    Wiadomosc wlasneRzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
+    kolejkujRzadanie(wlasneRzadanie);
+    
+    // broadcast ŻĄDANIA
+    Wiadomosc rzadanie = { RZADANIE, tid, ++wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
+    this->rozeslijWszystkim(rzadanie);
+    
+    // czekaj na potwierdzenia od wszystkich
+    while (this->liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1)
+        obsluzWiadomosci();
+
+    this->liczbaPotwierdzen = 0;
+    
+    wyswietlStan("Zebrałem wszystkie potwierdzenia (do zabrania)");
+    
+    /*
+    // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
+    // na odbiór wiadomości o zwolnieniu sekcji krytycznej
+    do {
+        obsluzWiadomosci();
+    } while (!czyMogeWejscDoSekcji() || liczbaDostepnychMPC == 0);
+    
+    // sekcja krytyczna
+    wyswietlStan("Jestem w sekcji krytycznej (zabrałem MPC)");
+    
+    Wiadomosc alert(ZARAZ_ZABIORE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
+    this->rozeslijWszystkim(alert);
+    while (liczbaPotwierdzen != LICZBA_BIBLIOTEKARZY - 1) {
+        obsluzWiadomosci();
+    }
+    liczbaPotwierdzen = 0;
+    
+    wyswietlStan("Zmieniam wartość zmiennej: liczbaDostepnychMPC (--)");
+    --this->liczbaDostepnychMPC;
+    
+    // broadcast informacji o zabraniu MPC wraz z nową wartością liczby dostępnych MPC
+    Wiadomosc zabranieMPC(ZABRANIE_MPC, tid, liczbaDostepnychMPC, ++wartoscZegaraLamporta, 0);
+    this->rozeslijWszystkim(zabranieMPC);
+    */
 }
 
 void Bibliotekarz::uzywajMPC() {
     wyswietlStan("Używam MPC");
     
-    cout << "\n" << PolaWiadomosci::LICZBA_POL << "\n";
     int microseconds = rand()%490000 + 10000;
     usleep(microseconds);
     ++wartoscZegaraLamporta;
@@ -143,7 +186,7 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
             odpowiedzNaRzadanie(wiadomosc[PolaWiadomosci::TID]);
             break;
         case POTWIERDZENIE:
-            break;
+            ++this->liczbaPotwierdzen;
         case ZWOLNIENIE_MPC:
             usunRzadanieZKolejki(wiadomosc[PolaWiadomosci::TID]);
             break;
