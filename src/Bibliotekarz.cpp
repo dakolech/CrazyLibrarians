@@ -74,6 +74,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
 void Bibliotekarz::uzywajMPC() {
     wyswietlStan("Używam MPC");
     
+    cout << "\n" << PolaWiadomosci::LICZBA_POL << "\n";
     int microseconds = rand()%490000 + 10000;
     usleep(microseconds);
     ++wartoscZegaraLamporta;
@@ -129,59 +130,59 @@ void Bibliotekarz::obsluzWiadomosci() {
     MPI_Status status;
     MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
     while (flag) {
-        MPI_Recv(&odpowiedz, sizeof(odpowiedz), MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        MPI_Recv(&odpowiedz, PolaWiadomosci::LICZBA_POL, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
         obsluzWiadomosc(odpowiedz);
         MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status);
     }
 }
 
 void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
-    switch (wiadomosc.typ) {
+    switch (wiadomosc[PolaWiadomosci::TYP]) {
         case RZADANIE:
             kolejkujRzadanie(wiadomosc);
-            odpowiedzNaRzadanie(wiadomosc.tid);
+            odpowiedzNaRzadanie(wiadomosc[PolaWiadomosci::TID]);
             break;
         case POTWIERDZENIE:
             break;
         case ZWOLNIENIE_MPC:
-            usunRzadanieZKolejki(wiadomosc.tid);
+            usunRzadanieZKolejki(wiadomosc[PolaWiadomosci::TID]);
             break;
     }
-    wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc.wartoscZegaraLamporta) + 1;
+    wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc[PolaWiadomosci::LAMPORT]) + 1;
 }
 
 void Bibliotekarz::kolejkujRzadanie(Wiadomosc w) {
     if (lista.empty()) {
-        lista.push_front(ElementListy{w.tid, w.wartoscZegaraLamporta, w.liczbaCzytelnikowDoPonaglenia});
+        lista.push_front(ElementListy{w[TID], w[LAMPORT], w[CZYTELNICY]});
     } else {
         for (auto it = lista.begin(); it != lista.end(); ++it) {
-            if (it->wartoscZegaraLamporta > w.wartoscZegaraLamporta ||
+            if (it->wartoscZegaraLamporta > w[LAMPORT] ||
             
-               (it->wartoscZegaraLamporta == w.wartoscZegaraLamporta &&
-                it->liczbaCzytelnikowDoPonaglenia > w.liczbaCzytelnikowDoPonaglenia) ||
+               (it->wartoscZegaraLamporta == w[LAMPORT] &&
+                it->liczbaCzytelnikowDoPonaglenia > w[CZYTELNICY]) ||
             
-               (it->wartoscZegaraLamporta == w.wartoscZegaraLamporta &&
-                it->liczbaCzytelnikowDoPonaglenia == w.liczbaCzytelnikowDoPonaglenia &&
-                it->tid > w.tid))
+               (it->wartoscZegaraLamporta == w[LAMPORT] &&
+                it->liczbaCzytelnikowDoPonaglenia == w[CZYTELNICY] &&
+                it->tid > w[TID]))
                 {
-                    lista.insert(it, ElementListy{w.tid, w.wartoscZegaraLamporta, w.liczbaCzytelnikowDoPonaglenia});
+                    lista.insert(it, ElementListy{w[TID], w[LAMPORT], w[CZYTELNICY]});
                     return;
                 }
         }
-        lista.push_back(ElementListy{w.tid, w.wartoscZegaraLamporta, w.liczbaCzytelnikowDoPonaglenia});
+        lista.push_back(ElementListy{w[TID], w[LAMPORT], w[CZYTELNICY]});
     }
 }
 
 void Bibliotekarz::odpowiedzNaRzadanie(int tidAdresata) {
-    Wiadomosc w(POTWIERDZENIE, tid, ++wartoscZegaraLamporta, 0);
-    MPI_Send(&w, sizeof(Wiadomosc), MPI_BYTE, tidAdresata, POTWIERDZENIE, MPI_COMM_WORLD);
+    Wiadomosc w = {POTWIERDZENIE, tid, ++wartoscZegaraLamporta, 0};
+    MPI_Send(&w, PolaWiadomosci::LICZBA_POL, MPI_INT, tidAdresata, POTWIERDZENIE, MPI_COMM_WORLD);
 }
 
 void Bibliotekarz::rozeslijWszystkim(Wiadomosc wiadomosc) {
     const int LICZBA_BIBLIOTEKARZY = Opcje::pobierzInstancje().pobierzLiczbeBibliotekarzy();
     for (int i = 0; i < LICZBA_BIBLIOTEKARZY; ++i) {
         if (i != tid) {
-            MPI_Send(&wiadomosc, sizeof(Wiadomosc), MPI_BYTE, i, wiadomosc.typ, MPI_COMM_WORLD);
+            MPI_Send(&wiadomosc, PolaWiadomosci::LICZBA_POL, MPI_INT, i, wiadomosc[PolaWiadomosci::TYP], MPI_COMM_WORLD);
         }
     }
 }
