@@ -243,9 +243,9 @@ void Bibliotekarz::wyswietlStan(string info) const {
 
     if (lista.size() > 0) {
         for (auto &e : lista)
-            cout << e.tid << " ";
+            cout << setw(2) << e.tid << " ";
     }
-    cout << string(2*(LICZBA_BIBLIOTEKARZY - lista.size()), ' ') << "| ";
+    cout << string(3*(LICZBA_BIBLIOTEKARZY - lista.size()), ' ') << "| ";
         
     cout << info << "\n";
 }
