@@ -3,14 +3,15 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 class Bibliotekarz {
     typedef int Wiadomosc[5];
     
-    enum PolaWiadomosci { TYP = 0, TID = 1, LAMPORT = 2, CZYTELNICY = 3, NR_ZWALNIANEGO_MPC = 4, LICZBA_POL = NR_ZWALNIANEGO_MPC + 1 };
-    enum TypWiadomosci  { RZADANIE, POTWIERDZENIE, ZWOLNIENIE_MPC };
+    enum PolaWiadomosci { TYP = 0, TID = 1, LAMPORT = 2, CZYTELNICY = 3, NR_MPC = 4, LICZBA_POL = NR_MPC + 1 };
+    enum TypWiadomosci  { RZADANIE, POTWIERDZENIE, ZABRANIE_MPC, ZWOLNIENIE_MPC };
 
     struct ElementListy {
         int tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia;
@@ -28,7 +29,9 @@ class Bibliotekarz {
 
     list<ElementListy> lista;
     int tid, wartoscZegaraLamporta, liczbaPotwierdzen,
-        nrOstatniegoZwolnionegoMPC, nrOczekiwanegoMPC;
+        nrOczekiwanegoMPC;
+    vector<bool> stanMPC;
+    
     public:
         Bibliotekarz(int tidRodzica);
 

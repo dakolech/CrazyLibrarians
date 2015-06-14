@@ -4,11 +4,14 @@
 #include <openmpi/mpi.h>
 #include <iostream>
 #include <iomanip>
+#include <algorithm>
 #include <unistd.h>
 
 Bibliotekarz::Bibliotekarz(int tidRodzica)
-    : tid(tidRodzica), wartoscZegaraLamporta(0), liczbaPotwierdzen(0), nrOstatniegoZwolnionegoMPC(-1),
-      nrOczekiwanegoMPC(-1) { }
+    : tid(tidRodzica), wartoscZegaraLamporta(0), liczbaPotwierdzen(0), nrOczekiwanegoMPC(-1) {
+    stanMPC.resize(Opcje::pobierzInstancje().pobierzLiczbeMPC());
+    fill(stanMPC.begin(), stanMPC.end(), true);
+}
 
 void Bibliotekarz::zajmujSieSoba() {
     wyswietlStan("Zajmuję się sobą");
@@ -32,11 +35,10 @@ void Bibliotekarz::poprosODostepDoMPC() {
     wyswietlStan("Proszę o dostęp do MPC (do ponaglenia: " + to_string(liczbaCzytelnikowDoPonaglenia) + ")");
     
     // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
-    Wiadomosc wlasneRzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
-    this->nrOczekiwanegoMPC = kolejkujRzadanie(wlasneRzadanie) % Opcje::pobierzInstancje().pobierzLiczbeMPC();
+    Wiadomosc rzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
+    this->nrOczekiwanegoMPC = kolejkujRzadanie(rzadanie) % Opcje::pobierzInstancje().pobierzLiczbeMPC();
     
     // broadcast ŻĄDANIA
-    Wiadomosc rzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
     this->rozeslijWszystkim(rzadanie);
     
     // czekaj na potwierdzenia od wszystkich
@@ -45,17 +47,20 @@ void Bibliotekarz::poprosODostepDoMPC() {
 
     this->liczbaPotwierdzen = 0;
     
-    wyswietlStan("Zebrałem wszystkie potwierdzenia");
+    wyswietlStan("Zebrałem wszystkie potwierdzenia, czekam na zwolnienie MPC nr " + to_string(this->nrOczekiwanegoMPC));
     
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
     do {
         obsluzWiadomosci();
     } while (!czyMogeWejscDoSekcji());
+    
+    Wiadomosc zabranieMPC = { ZABRANIE_MPC, tid, ++wartoscZegaraLamporta, 0, this->nrOczekiwanegoMPC };
+    this->rozeslijWszystkim(zabranieMPC);
 }
 
 void Bibliotekarz::uzywajMPC() {
-    wyswietlStan("\033[31mUŻYWAM MPC\033[m");
+    wyswietlStan("\033[31mUŻYWAM MPC NR " + to_string(this->nrOczekiwanegoMPC) + "\033[m");
     
     int microseconds = rand()%490000 + 10000;
     usleep(microseconds);
@@ -63,7 +68,7 @@ void Bibliotekarz::uzywajMPC() {
 }
 
 void Bibliotekarz::zwolnijMPC() {
-    wyswietlStan("\033[32mZWALNIAM MPC\033[m");
+    wyswietlStan("\033[32mZWALNIAM MPC NR " + to_string(this->nrOczekiwanegoMPC) + "\033[m");
     
     // usuń własne żądanie z kolejki
     usunRzadanieZKolejki(tid);
@@ -93,9 +98,12 @@ void Bibliotekarz::obsluzWiadomosc(Wiadomosc wiadomosc) {
         case POTWIERDZENIE:
             ++this->liczbaPotwierdzen;
             break;
+        case ZABRANIE_MPC:
+            stanMPC[wiadomosc[PolaWiadomosci::NR_MPC]] = false;
+            break;
         case ZWOLNIENIE_MPC:
             usunRzadanieZKolejki(wiadomosc[PolaWiadomosci::TID]);
-            this->nrOstatniegoZwolnionegoMPC = wiadomosc[PolaWiadomosci::NR_ZWALNIANEGO_MPC];
+            stanMPC[wiadomosc[PolaWiadomosci::NR_MPC]] = true;
             break;
     }
     wartoscZegaraLamporta = max(wartoscZegaraLamporta, wiadomosc[PolaWiadomosci::LAMPORT]) + 1;
@@ -156,10 +164,8 @@ bool Bibliotekarz::czyMogeWejscDoSekcji() const {
          iterator != lista.end();
          ++i, ++iterator)
     {
-        if (iterator->tid == tid) {
-            if (this->nrOstatniegoZwolnionegoMPC == -1 || this->nrOstatniegoZwolnionegoMPC == this->nrOczekiwanegoMPC)
-                return true;
-        }
+        if (iterator->tid == tid && stanMPC[this->nrOczekiwanegoMPC])
+            return true;
     }
     return false;
 }
@@ -176,14 +182,7 @@ void Bibliotekarz::wyswietlStan(string info) const {
             cout << setw(2) << e.tid << " ";
     }
     
-    if (LICZBA_BIBLIOTEKARZY - lista.size() > LICZBA_BIBLIOTEKARZY) {
-        cout << "lista.size() == " << lista.size() << "\n";
-        return;
-    }
-    
-    cout << string(3*(LICZBA_BIBLIOTEKARZY - lista.size()), ' ') << "| ";
-        
-    cout << info << "\n";
+    cout << string(3*(LICZBA_BIBLIOTEKARZY - lista.size()), ' ') << "| " << info << "\n";
 }
 
 
