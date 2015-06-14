@@ -36,7 +36,6 @@ void Bibliotekarz::poprosODostepDoMPC() {
     
     // dodaj własne ŻĄDANIE do kolejki (chcę zabrać MPC)
     Wiadomosc rzadanie = { RZADANIE, tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia };
-    this->nrOczekiwanegoMPC = kolejkujRzadanie(rzadanie) % Opcje::pobierzInstancje().pobierzLiczbeMPC();
     
     // broadcast ŻĄDANIA
     this->rozeslijWszystkim(rzadanie);
@@ -49,6 +48,7 @@ void Bibliotekarz::poprosODostepDoMPC() {
     
     wyswietlStan("Zebrałem wszystkie potwierdzenia, czekam na zwolnienie MPC nr " + to_string(this->nrOczekiwanegoMPC));
     
+    this->nrOczekiwanegoMPC = kolejkujRzadanie(rzadanie) % Opcje::pobierzInstancje().pobierzLiczbeMPC();
     // sprawdzenie, czy jestem już na szczycie swojej kolejki, jeśli nie, to czekanie
     // na odbiór wiadomości o zwolnieniu sekcji krytycznej
     do {
