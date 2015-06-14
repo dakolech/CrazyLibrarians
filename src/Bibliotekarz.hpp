@@ -1,41 +1,37 @@
 #ifndef BIBLIOTEKARZ
 #define BIBLIOTEKARZ
 
-#include "Definicje.hpp"
 #include <list>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 class Bibliotekarz {
-    struct Wiadomosc {
-        TypWiadomosci typ;
-        int tid, zegarLamporta, aktualnaLiczbaWolnychMPC,
-            liczbaCzytelnikowDoPonaglenia;
-
-        Wiadomosc() { }
-        Wiadomosc(TypWiadomosci typ, int tid, int MPCs, int lamport, int czytelnicy)
-            : typ(typ), tid(tid), aktualnaLiczbaWolnychMPC(MPCs), zegarLamporta(lamport), 
-              liczbaCzytelnikowDoPonaglenia(czytelnicy) { };
-    };
+    typedef int Wiadomosc[5];
+    
+    enum PolaWiadomosci { TYP = 0, TID = 1, LAMPORT = 2, CZYTELNICY = 3, NR_MPC = 4, LICZBA_POL = NR_MPC + 1 };
+    enum TypWiadomosci  { RZADANIE, POTWIERDZENIE, ZABRANIE_MPC, ZWOLNIENIE_MPC };
 
     struct ElementListy {
-        int tid, liczbaCzytelnikowDoPonaglenia;
+        int tid, wartoscZegaraLamporta, liczbaCzytelnikowDoPonaglenia;
     };
     
     Bibliotekarz() = delete;
     void obsluzWiadomosci();
     void obsluzWiadomosc(Wiadomosc wiadomosc);
-    void kolejkujRzadanie(int tid, int liczbaCzytelnikowDoPonaglenia);
+    int kolejkujRzadanie(Wiadomosc wiadomosc);
     void odpowiedzNaRzadanie(int tidAdresata);
     void rozeslijWszystkim(Wiadomosc wiadomosc);
     void usunRzadanieZKolejki(int tid);
     void wyswietlStan(string info) const;
     bool czyMogeWejscDoSekcji() const;
-        
+
     list<ElementListy> lista;
-    int liczbaDostepnychMPC, tid, wartoscZegaraLamporta,
-        liczbaCzytelnikowDoPonaglenia, liczbaPotwierdzen;
+    int tid, wartoscZegaraLamporta, liczbaPotwierdzen,
+        nrOczekiwanegoMPC;
+    vector<bool> stanMPC;
+    
     public:
         Bibliotekarz(int tidRodzica);
 
